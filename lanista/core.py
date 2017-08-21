@@ -1,8 +1,5 @@
-import gevent
-from gevent.queue import Queue
 
-
-class Arena(gevent.Greenlet):
+class Arena(object):
     """
     This is the superclass for environments that multiple learner agents may interact in.
 
@@ -51,28 +48,11 @@ class Arena(gevent.Greenlet):
     _seed
 
     """
-    def live(self):
-        """
-        You probably won't need to override this.
-        This method readies the Greenlet object so it can receive and handle messages.
-        It also has several checks to make sure the correct number of messages are received.
-        """
-        self.live = True
-        print "%s is alive and well." % self.name
-
-        while self.live:
-            if not self.mailbox.empty():
-                if len(self.mailbox) > len(self.agents) + len(self.games):
-                    raise AssertionError("Agents are sending the Arena more than one message per step!"
-                                         "This will cause thread slowdown and halting.")
-                message = self.mailbox.get()
-                self.receive(message)
 
     def __init__(self):
         super(Arena, self).__init__()
         self.agents = {}
         self.games = {}
-        self.mailbox = Queue()
 
     def begin(self):
         """
@@ -80,15 +60,7 @@ class Arena(gevent.Greenlet):
         publishing state -> receiving actions -> updating state -> publishing state
         """
 
-        self.start() # Start up Greenlet.
-        for name, agent in self.agents.iteritems():
-            agent.start() # Start up Agent Greenlets
-
-        gevent.joinall([gevent.spawn(self._begin())]
-                       + [gevent.spawn(agent.live()) for name, agent in self.agents.iteritems()]
-                       + [gevent.spawn(self.live())]
-                       )
-
+        self._begin()
 
     def reset(self):
         """
@@ -116,15 +88,15 @@ class Arena(gevent.Greenlet):
 
         self._register(agent)
 
-    def receive(self, *args):
+    def receive(self, *args, **kwargs):
         """
         Generic method for handling actions sent to the Arena.
         This can be configured for Agents and Arenas running on multiple cores or CPUs.
         """
 
-        self._receive(*args)
+        self._receive(*args, **kwargs)
 
-    def prime(self, *args):
+    def prime(self, *args, **kwargs):
         """
         Before stepping forward the Arena in time, this method should be used to
         prime each Agent with actions that they have chosen. This way the Arena's state dynamics functions
@@ -134,18 +106,18 @@ class Arena(gevent.Greenlet):
         is primed to <throw a net> on the Murmillo--then the Murmillo's <stab>
         action may be interrupted during the step function because he was netted first.
         """
-        self._prime(*args)
+        self._prime(*args, **kwargs)
 
-    def step(self, *args):
+    def step(self, *args, **kwargs):
         """
         This is the core method of an Arena, where all registered Agents, their actions, and the
         the current state are all used in order to determine the next state and the reward for each agent.
         """
 
-        self._step(*args)
+        self._step(*args, **kwargs)
 
 
-    def publish(self, agent, *args):
+    def publish(self, agent, *args, **kwargs):
         """
         After new rewards and the latest state have been determined,
         these data must be published to each registered Agent.
@@ -153,7 +125,7 @@ class Arena(gevent.Greenlet):
         This should send states and rewards for each agent in self.agents.
         """
 
-        self._publish(agent, *args)
+        self._publish(agent, *args, **kwargs)
 
     def seed(self, seed = None):
         """
@@ -167,13 +139,13 @@ class Arena(gevent.Greenlet):
     def _reset(self): raise NotImplementedError
     def _close(self): raise NotImplementedError
     def _register(self, agent): raise NotImplementedError
-    def _receive(self, *args): raise NotImplementedError
-    def _prime(self, *args): raise NotImplementedError
-    def _step(self, *args): raise NotImplementedError
-    def _publish(self, agent, *args): raise NotImplementedError
+    def _receive(self, *args, **kwargs): raise NotImplementedError
+    def _prime(self, *args, **kwargs): raise NotImplementedError
+    def _step(self, *args, **kwargs): raise NotImplementedError
+    def _publish(self, agent, *args, **kwargs): raise NotImplementedError
     def _seed(self, seed = None): raise NotImplementedError
 
-class Agent(gevent.Greenlet):
+class Agent(object):
     """
     This is a single decision-making entity placed in an Arena.
 
@@ -210,28 +182,11 @@ class Agent(gevent.Greenlet):
 
     """
 
-    def live(self):
-        """
-        You probably won't need to override this.
-        This method readies the Greenlet object so it can receive and handle messages.
-        It also has several checks to make sure the correct number of messages are received.
-        """
-        self.live = True
-        print "%s is alive." % self.name
-        while self.live:
-            if not self.mailbox.empty():
-                if len(self.mailbox) > len(self.arenas):
-                    raise AssertionError("Arena is sending this agent more than one message per step!"
-                                         "This will cause thread slowdown and halting.")
-                message = self.mailbox.get()
-                self.receive(message)
-
     def __init__(self):
         super(Agent, self).__init__()
         self.arenas = {}
-        self.mailbox = Queue()
 
-    def receive(self, *args):
+    def receive(self, *args, **kwargs):
         """
         This method covers receipt of new state and reward signal from the Arena,
         for use in learning how to choose actions and for choosing the next action.
@@ -240,15 +195,15 @@ class Agent(gevent.Greenlet):
         an action back to the Arena.
         """
 
-        self._receive(*args)
+        self._receive(*args, **kwargs)
 
-    def learn(self, *args):
+    def learn(self, *args, **kwargs):
         """
         This method updates the Agent's internal model using a reward signal
         from the Arena.
         """
 
-        self._learn(*args)
+        self._learn(*args, **kwargs)
 
     def perceive(self, state):
         """
@@ -268,7 +223,7 @@ class Agent(gevent.Greenlet):
 
         return self._policy(representation)
 
-    def publish(self, *args):
+    def publish(self, *args, **kwargs):
         """
         Once an action is committed to, it's published to the Arena for final
         use in stepping forward in time.
@@ -276,13 +231,13 @@ class Agent(gevent.Greenlet):
 
         self._publish(*args)
 
-    def _receive(self, *args): raise NotImplementedError
-    def _learn(self, *args): raise NotImplementedError
+    def _receive(self, *args, **kwargs): raise NotImplementedError
+    def _learn(self, *args, **kwargs): raise NotImplementedError
     def _perceive(self, state): raise NotImplementedError
     def _policy(self, representation): raise NotImplementedError
-    def _publish(self,*args): raise NotImplementedError
+    def _publish(self,*args, **kwargs): raise NotImplementedError
 
-class Game(gevent.Greenlet):
+class Game(object):
     """
     This class allows you to place a group of Agents in an Arena and allow them
     to play out scenarios for a number of episodes.
@@ -298,7 +253,6 @@ class Game(gevent.Greenlet):
     def __init__(self, name, arena_array, agent_array):
         super(Game, self).__init__()
         self.name = name
-        self.mailbox = Queue()
         self.episodes = 0
 
         self.arenas = arena_array
@@ -312,19 +266,6 @@ class Game(gevent.Greenlet):
             for agent in self.agents:
                 arena.register(agent)
 
-    def live(self):
-        """
-        You probably won't need to override this.
-        This method readies the Greenlet object so it can receive and handle messages.
-        It also has several checks to make sure the correct number of messages are received.
-        """
-        self.live = True
-        print "%s is alive" % self.name
-        while self.live:
-            if not self.mailbox.empty():
-                assert len(self.mailbox) <= len(self.arenas), "Game is getting more messages than there are arenas!"
-                message = self.mailbox.get()
-                self.receive(message)
 
     def receive(self, *args):
         """
@@ -333,16 +274,16 @@ class Game(gevent.Greenlet):
 
         self._receive(*args)
 
-    def publish(self, arena, *args):
+    def publish(self, arena, *args, **kwargs):
         """
         This should publish a particular message to a specified Arena.
         This simplest way to do this is to simply put() something in the Arena's mailbox attribute.
         The publish method will mainly be used to send a stop signal, but can be useful in many other cases.
         """
 
-        self._publish(arena, *args)
+        self._publish(arena, *args, **kwargs)
 
-    def run(self, episodes = 1):
+    def begin(self, episodes = 1):
         """
         This method starts up the cycle of
         <publishing state --> responding to state with actions -->
@@ -356,8 +297,6 @@ class Game(gevent.Greenlet):
         for arena in self.arenas:
             arena.begin()
 
-        #Spin up the Game actor and have it listen for messages.
-        self.live()
 
-    def _receive(self,*args): raise NotImplementedError
-    def _publish(self, arena,  *args): raise NotImplementedError
+    def _receive(self,*args, **kwargs): raise NotImplementedError
+    def _publish(self, arena,  *args, **kwargs): raise NotImplementedError
