@@ -37,6 +37,12 @@ class HandlerRegistry(dict):
 
         return register
 
+class PoisonPill(Exception):
+    """
+    This is a special message that can be used to kill an actor and all related actors.
+    """
+    pass
+
 class ArenaThread(Arena):
 
     """
@@ -46,19 +52,74 @@ class ArenaThread(Arena):
     which means things will be slower than they can possibly be on a true parallel multi-core actor system.
     """
 
+    message_handlers = HandlerRegistry()
+
     def __init__(self):
         super(ArenaThread, self).__init__()
         self.mailbox = Queue()
 
     @classmethod
     def spawn(cls, *args, **kwargs):
+        """
+        This is a factory method that actually creates a thread actor.
+        To instantiate an ArenaThread object you must use it like so:
+
+        new_arena_thread = ArenaThreadChild.spawn(arguments)
+
+        """
         self = cls(*args, **kwargs)
+        self.begin()
         start_thread(function = self.live, name = self.name)
         return self
 
+    @message_handlers(PoisonPill)
+    def onPoisonPill(self, sender, message):
+        """
+        This poison pill handler kills the Arena and all sub Agents.
+        """
+        for name, agent in self.agents.iteritems():
+            self.publish(agent, PoisonPill())
+
+        raise message # This, in concert with the live() method causes thread completion.
+
     def live(self):
-        self.begin()
-        self.handleMessages()
+        """
+        Override this if you want to involve another stop message,
+        or have a different listening control flow.
+        """
+
+        try:
+            while True:
+                if not self.mailbox.empty():
+                    sender, message = self.mailbox.get()
+                    self.receive(sender, message)
+        except PoisonPill:
+            for name, agent in self.agents.iteritems():
+                self.publish(agent, PoisonPill())
+
+    def handleMessage(self, sender, message):
+        """
+        Example of how to use the handler registry.
+        It's not used in this protoclass.
+        """
+
+        registry = self.__class__.message_handlers
+        handler_function = registry.get(message.__class__)
+        if handler_function is not None:
+            handler_function(self, sender, message)
+
+
+class AgentThread(Agent):
+
+    message_handlers = HandlerRegistry()
+
+    def __init__(self):
+        super(ArenaThread, self).__init__()
+        self.mailbox = Queue()
+
+
+
+
 
 
 

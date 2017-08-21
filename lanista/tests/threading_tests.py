@@ -1,42 +1,47 @@
-from lanista.threadactors import start_thread, HandlerRegistry
+from lanista.threadactors import start_thread, PoisonPill
 from Queue import Queue
-# import visdom
-#
-# vis = visdom.Visdom()
+
 
 # Testing message passing loop between different actors
 
 class BasicActor():
 
-    def __init__(self, name):
-        self.name = name
-
-    def __repr__(self):
-        return "Basic Actor"
-
     @classmethod
     def spawn(cls, *args, **kwargs):
-        print cls
         self = cls(*args, **kwargs)
         self.inbox = Queue()
         start_thread(function = self.live, name = self.name)
+        print "leep"
         return self
 
-    handles = HandlerRegistry()
+    def __init__(self, name):
+        self.name = name
 
     def live(self):
-
-        while True:
-            if not self.inbox.empty():
-                message, sender = self.inbox.get()
-                print message
-                sender.inbox.put((self.name, self))
+        try:
+            while True:
+                if not self.inbox.empty():
+                    message, sender = self.inbox.get()
+                    print message
+                    if type(message) == type(PoisonPill()):
+                        raise message
+                    sender.inbox.put((self.name, self))
+        except PoisonPill:
+            print "Dying."
+            pass
 
 meep = BasicActor.spawn(name = "meep")
 moop = BasicActor.spawn(name = "moop")
 
-#Kicking off the eternal cycle
+#Kicking off an eternal cycle
 meep.inbox.put((moop.name, moop))
+
+#Poisoning an actor to stop the cycle.
+import time
+time.sleep(0.2)
+pill = PoisonPill()
+meep.inbox.put((pill, moop))
+
 
 
 
