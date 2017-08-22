@@ -43,7 +43,7 @@ class PoisonPill(Exception):
     """
     pass
 
-class ArenaThread(Arena):
+class ThreadActor():
 
     """
     This version of the Arena uses python.threading to spawn actors on various threads.
@@ -56,7 +56,6 @@ class ArenaThread(Arena):
 
     def __init__(self):
         super(ArenaThread, self).__init__()
-        self.mailbox = Queue()
 
     @classmethod
     def spawn(cls, *args, **kwargs):
@@ -68,6 +67,7 @@ class ArenaThread(Arena):
 
         """
         self = cls(*args, **kwargs)
+        self.mailbox = Queue()
         self.begin()
         start_thread(function = self.live, name = self.name)
         return self
@@ -77,25 +77,14 @@ class ArenaThread(Arena):
         """
         This poison pill handler kills the Arena and all sub Agents.
         """
-        for name, agent in self.agents.iteritems():
-            self.publish(agent, PoisonPill())
-
         raise message # This, in concert with the live() method causes thread completion.
 
     def live(self):
         """
-        Override this if you want to involve another stop message,
-        or have a different listening control flow.
+        Override this with a message-listening control flow.
         """
+        raise NotImplementedError
 
-        try:
-            while True:
-                if not self.mailbox.empty():
-                    sender, message = self.mailbox.get()
-                    self.receive(sender, message)
-        except PoisonPill:
-            for name, agent in self.agents.iteritems():
-                self.publish(agent, PoisonPill())
 
     def handleMessage(self, sender, message):
         """
@@ -109,18 +98,115 @@ class ArenaThread(Arena):
             handler_function(self, sender, message)
 
 
-class AgentThread(Agent):
+#GAME ACTOR RECIPES
+
+class ArenaThread(Arena, ThreadActor):
+
+    """
+    This mixes all the sweet parallelism of the Threaded actor class
+    with all the reinforcement learning contracts of an Arena.
+    """
 
     message_handlers = HandlerRegistry()
 
     def __init__(self):
         super(ArenaThread, self).__init__()
-        self.mailbox = Queue()
+
+    def live(self):
+        """
+        Override this if you want to involve another stop message,
+        or have a different listening control flow.
+        """
+        try:
+            while True:
+                if not self.mailbox.empty():
+                    sender, message = self.mailbox.get()
+                    self.receive(sender, message)
+        except PoisonPill:
+            for name, agent in self.agents.iteritems():
+                self.publish(agent, PoisonPill())
+            pass
+
+    def handleMessage(self, sender, message):
+        """
+        Example of how to use the handler registry.
+        It's not used in this protoclass.
+        """
+
+        registry = self.__class__.message_handlers
+        handler_function = registry.get(message.__class__)
+        if handler_function is not None:
+            handler_function(self, sender, message)
 
 
+class AgentThread(ThreadActor, Agent):
 
+    """
+    This mixes all the sweet parallelism of the Threaded actor class
+    with all the reinforcement learning contracts of an Agent.
+    """
 
+    message_handlers = HandlerRegistry()
 
+    def __init__(self):
+        super(AgentThread, self).__init__()
 
+    def live(self):
+        """
+        Override this if you want to involve another stop message,
+        or have a different listening control flow.
+        """
+        try:
+            while True:
+                if not self.mailbox.empty():
+                    sender, message = self.mailbox.get()
+                    self.receive(sender, message)
+        except PoisonPill:
+            pass
 
+    def handleMessage(self, sender, message):
+        """
+        Example of how to use the handler registry.
+        It's not used in this protoclass.
+        """
 
+        registry = self.__class__.message_handlers
+        handler_function = registry.get(message.__class__)
+        if handler_function is not None:
+            handler_function(self, sender, message)
+
+class GameThread(Game, ThreadActor):
+
+    """
+    This mixes all the sweet parallelism of the Threaded actor class
+    with all the reinforcement learning contracts of a Game.
+    """
+
+    message_handlers = HandlerRegistry()
+
+    def __init__(self):
+        super(GameThread, self).__init__()
+
+    def live(self):
+        """
+        Override this if you want to involve another stop message,
+        or have a different listening control flow.
+        """
+        try:
+            while True:
+                if not self.mailbox.empty():
+                    sender, message = self.mailbox.get()
+                    self.receive(sender, message)
+        except PoisonPill:
+            pass
+
+    def handleMessage(self, sender, message):
+        """
+        Example of how to use the handler registry.
+        It's not used in this protoclass.
+        """
+
+        registry = self.__class__.message_handlers
+        handler_function = registry.get(message.__class__)
+        if handler_function is not None:
+            handler_function(self, sender, message)
