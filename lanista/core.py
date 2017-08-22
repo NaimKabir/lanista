@@ -267,12 +267,12 @@ class Game(object):
                 arena.register(agent)
 
 
-    def receive(self, *args):
+    def receive(self, *args, **kwargs):
         """
         This should receive some data about Arena state,
         """
 
-        self._receive(*args)
+        self._receive(*args, **kwargs)
 
     def publish(self, arena, *args, **kwargs):
         """
@@ -292,6 +292,7 @@ class Game(object):
         For all the arenas belonging to a particular game type.
         """
         self.episodes = episodes
+        print "Playing %d Episodes" % self.episodes
 
         #Subsequently spin up the Arenas, which in turn will spawn and/or register their Agent actors.
         for arena in self.arenas:

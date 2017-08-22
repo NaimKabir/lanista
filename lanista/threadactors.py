@@ -1,6 +1,7 @@
 from lanista.core import Arena, Agent, Game
 from threading import Thread
 from Queue import Queue
+import time
 
 # Various utilities for dealing with messages and threads
 
@@ -43,6 +44,9 @@ class PoisonPill(Exception):
     """
     pass
 
+class UnregisteredMessage(object):
+    pass
+
 class ThreadActor():
 
     """
@@ -55,8 +59,7 @@ class ThreadActor():
     message_handlers = HandlerRegistry()
 
 
-    @classmethod
-    def spawn(cls, *args, **kwargs):
+    def __init__(self):
         """
         This is a factory method that actually creates a thread actor.
         To instantiate an ArenaThread object you must use it like so:
@@ -64,11 +67,13 @@ class ThreadActor():
         new_arena_thread = ArenaThreadChild.spawn(arguments)
 
         """
-        self = cls(*args, **kwargs)
         self.mailbox = Queue()
-        self.begin()
         start_thread(function = self.live, name = self.name)
-        return self
+
+    @message_handlers(UnregisteredMessage)
+    def onUnregisteredMessage(self, sender, message):
+        print("%s is sending an unregistered message to %s. "
+              "This will likely cause a blocked cycle." % (sender, self))
 
     @message_handlers(PoisonPill)
     def onPoisonPill(self, sender, message):
@@ -89,9 +94,9 @@ class ThreadActor():
         Example of how to use the handler registry.
         It's not used in this protoclass.
         """
-
+        print "Handling message of type %s from %s" % (message.__class__, sender.__class__)
         registry = self.__class__.message_handlers
-        handler_function = registry.get(message.__class__)
+        handler_function = registry.get(message.__class__) or registry.get(UnregisteredMessage)
         if handler_function is not None:
             handler_function(self, sender, message)
 
@@ -108,7 +113,8 @@ class ArenaThread(Arena, ThreadActor):
     message_handlers = HandlerRegistry()
 
     def __init__(self):
-        super(ArenaThread, self).__init__()
+        Arena.__init__(self)
+        ThreadActor.__init__(self)
 
     def live(self):
         """
@@ -122,22 +128,14 @@ class ArenaThread(Arena, ThreadActor):
                     self.receive(sender, message)
         except PoisonPill:
             for name, agent in self.agents.iteritems():
-                self.publish(agent, PoisonPill())
+                self.publish(agent, self, PoisonPill())
+            for name, game in self.games.iteritems():
+                self.publish(game, self, PoisonPill())
             pass
 
-    def handleMessage(self, sender, message):
-        """
-        Example of how to use the handler registry.
-        It's not used in this protoclass.
-        """
-
-        registry = self.__class__.message_handlers
-        handler_function = registry.get(message.__class__)
-        if handler_function is not None:
-            handler_function(self, sender, message)
 
 
-class AgentThread(ThreadActor, Agent):
+class AgentThread(Agent, ThreadActor):
 
     """
     This mixes all the sweet parallelism of the Threaded actor class
@@ -147,7 +145,8 @@ class AgentThread(ThreadActor, Agent):
     message_handlers = HandlerRegistry()
 
     def __init__(self):
-        super(AgentThread, self).__init__()
+        Agent.__init__(self)
+        ThreadActor.__init__(self)
 
     def live(self):
         """
@@ -162,16 +161,6 @@ class AgentThread(ThreadActor, Agent):
         except PoisonPill:
             pass
 
-    def handleMessage(self, sender, message):
-        """
-        Example of how to use the handler registry.
-        It's not used in this protoclass.
-        """
-
-        registry = self.__class__.message_handlers
-        handler_function = registry.get(message.__class__)
-        if handler_function is not None:
-            handler_function(self, sender, message)
 
 class GameThread(Game, ThreadActor):
 
@@ -182,8 +171,9 @@ class GameThread(Game, ThreadActor):
 
     message_handlers = HandlerRegistry()
 
-    def __init__(self):
-        super(GameThread, self).__init__()
+    def __init__(self, name, arena_array, agent_array):
+        Game.__init__(self, name, arena_array, agent_array)
+        ThreadActor.__init__(self)
 
     def live(self):
         """
@@ -197,14 +187,3 @@ class GameThread(Game, ThreadActor):
                     self.receive(sender, message)
         except PoisonPill:
             pass
-
-    def handleMessage(self, sender, message):
-        """
-        Example of how to use the handler registry.
-        It's not used in this protoclass.
-        """
-
-        registry = self.__class__.message_handlers
-        handler_function = registry.get(message.__class__)
-        if handler_function is not None:
-            handler_function(self, sender, message)

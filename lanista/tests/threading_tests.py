@@ -1,21 +1,15 @@
 from lanista.threadactors import start_thread, PoisonPill
-# from Queue import Queue
 from Queue import Queue
 
 # Testing message passing loop between different actors
 
 class BasicActor():
 
-    @classmethod
-    def spawn(cls, *args, **kwargs):
-        self = cls(*args, **kwargs)
-        self.inbox = Queue()
-        start_thread(function = self.live, name = self.name)
-        print("leep")
-        return self
-
     def __init__(self, name):
         self.name = name
+        self.inbox = Queue()
+        start_thread(function = self.live, name = self.name)
+
 
     def live(self):
         try:
@@ -30,8 +24,8 @@ class BasicActor():
             print("Dying.")
             pass
 
-meep = BasicActor.spawn(name = "meep")
-moop = BasicActor.spawn(name = "moop")
+meep = BasicActor(name = "meep")
+moop = BasicActor(name = "moop")
 
 #Kicking off an eternal cycle
 meep.inbox.put((moop.name, moop))
