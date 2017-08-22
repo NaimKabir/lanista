@@ -54,8 +54,6 @@ class ThreadActor():
 
     message_handlers = HandlerRegistry()
 
-    def __init__(self):
-        super(ArenaThread, self).__init__()
 
     @classmethod
     def spawn(cls, *args, **kwargs):
