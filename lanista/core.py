@@ -1,4 +1,6 @@
 
+#TODO add argument specificity 
+
 class Arena(object):
     """
     This is the superclass for environments that multiple learner agents may interact in.
@@ -237,6 +239,11 @@ class Agent(object):
     def _policy(self, representation): raise NotImplementedError
     def _publish(self,*args, **kwargs): raise NotImplementedError
 
+        
+#TODO blue print for team objectives, game modes
+
+# Structural change: agents should be added to a game, which is what's using some Arena to get state transitions
+
 class Game(object):
     """
     This class allows you to place a group of Agents in an Arena and allow them
@@ -258,6 +265,7 @@ class Game(object):
         self.arenas = arena_array
         self.agents = agent_array
 
+        #TODO do the multi arena agent array thing
         #Adding a pointer to this Game to Arenas' internal state, for messaging purposes.
         for arena in self.arenas:
             arena.games[name] = self
