@@ -5,11 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d09b5d03-b23b-4434-9baf-8e3eacfc44ea" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/lanista.iml" afterPath="$PROJECT_DIR$/.idea/lanista.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lanista/core.py" afterPath="$PROJECT_DIR$/lanista/core.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lanista/tests/threading_tests.py" afterPath="$PROJECT_DIR$/lanista/tests/threading_tests.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lanista/threadactors.py" afterPath="$PROJECT_DIR$/lanista/threadactors.py" />
     </list>
     <ignored path="ludus.iws" />
@@ -40,23 +36,22 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="threadactors.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="threadactors.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lanista/threadactors.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2610">
-              <caret line="174" column="59" lean-forward="false" selection-start-line="174" selection-start-column="59" selection-end-line="174" selection-end-column="59" />
+            <state relative-caret-position="270">
+              <caret line="93" column="51" lean-forward="true" selection-start-line="93" selection-start-column="51" selection-end-line="93" selection-end-column="51" />
               <folding>
                 <element signature="e#0#43#0" expanded="true" />
-                <marker date="1503437262858" expanded="true" signature="3113:3165" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="threading_tests.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="threading_tests.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lanista/tests/threading_tests.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="243">
+            <state relative-caret-position="270">
               <caret line="18" column="34" lean-forward="true" selection-start-line="18" selection-start-column="34" selection-end-line="18" selection-end-column="34" />
               <folding>
                 <element signature="e#0#57#0" expanded="true" />
@@ -117,8 +112,8 @@
         <option value="$PROJECT_DIR$/examples/tribes/tribes.py" />
         <option value="$PROJECT_DIR$/lanista/tests/mixins.py" />
         <option value="$PROJECT_DIR$/lanista/core.py" />
-        <option value="$PROJECT_DIR$/lanista/threadactors.py" />
         <option value="$PROJECT_DIR$/lanista/tests/threading_tests.py" />
+        <option value="$PROJECT_DIR$/lanista/threadactors.py" />
       </list>
     </option>
   </component>
@@ -428,7 +423,6 @@
           <caret line="173" column="0" lean-forward="true" selection-start-line="173" selection-start-column="0" selection-end-line="173" selection-end-column="0" />
           <folding>
             <element signature="e#0#43#0" expanded="true" />
-            <marker date="1503437262858" expanded="true" signature="3113:3165" ph="..." />
           </folding>
         </state>
       </provider>
@@ -481,7 +475,6 @@
           <caret line="2" column="6" lean-forward="false" selection-start-line="2" selection-start-column="6" selection-end-line="2" selection-end-column="6" />
           <folding>
             <element signature="e#0#43#0" expanded="true" />
-            <marker date="1503437262858" expanded="true" signature="3113:3165" ph="..." />
           </folding>
         </state>
       </provider>
@@ -534,7 +527,6 @@
           <caret line="14" column="80" lean-forward="false" selection-start-line="14" selection-start-column="80" selection-end-line="14" selection-end-column="80" />
           <folding>
             <element signature="e#0#43#0" expanded="true" />
-            <marker date="1503437262858" expanded="true" signature="3113:3165" ph="..." />
           </folding>
         </state>
       </provider>
@@ -579,7 +571,6 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#43#0" expanded="true" />
-            <marker date="1503437262858" expanded="true" signature="3113:3165" ph="..." />
           </folding>
         </state>
       </provider>
@@ -633,23 +624,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lanista/threadactors.py">
+    <entry file="file://$PROJECT_DIR$/lanista/tests/threading_tests.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2610">
-          <caret line="174" column="59" lean-forward="false" selection-start-line="174" selection-start-column="59" selection-end-line="174" selection-end-column="59" />
+        <state relative-caret-position="270">
+          <caret line="18" column="34" lean-forward="true" selection-start-line="18" selection-start-column="34" selection-end-line="18" selection-end-column="34" />
           <folding>
-            <element signature="e#0#43#0" expanded="true" />
-            <marker date="1503437262858" expanded="true" signature="3113:3165" ph="..." />
+            <element signature="e#0#57#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lanista/tests/threading_tests.py">
+    <entry file="file://$PROJECT_DIR$/lanista/threadactors.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="243">
-          <caret line="18" column="34" lean-forward="true" selection-start-line="18" selection-start-column="34" selection-end-line="18" selection-end-column="34" />
+        <state relative-caret-position="270">
+          <caret line="93" column="51" lean-forward="true" selection-start-line="93" selection-start-column="51" selection-end-line="93" selection-end-column="51" />
           <folding>
-            <element signature="e#0#57#0" expanded="true" />
+            <element signature="e#0#43#0" expanded="true" />
           </folding>
         </state>
       </provider>
