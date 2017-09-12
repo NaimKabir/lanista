@@ -94,7 +94,6 @@ class ThreadActor():
         Example of how to use the handler registry.
         It's not used in this protoclass.
         """
-        print "Handling message of type %s from %s" % (message.__class__, sender.__class__)
         registry = self.__class__.message_handlers
         handler_function = registry.get(message.__class__) or registry.get(UnregisteredMessage)
         if handler_function is not None:

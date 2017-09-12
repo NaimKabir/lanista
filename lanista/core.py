@@ -260,7 +260,6 @@ class Game(object):
     def __init__(self, name, arena_array, agent_array):
         super(Game, self).__init__()
         self.name = name
-        self.episodes = 0
 
         self.arenas = arena_array
         self.agents = agent_array
